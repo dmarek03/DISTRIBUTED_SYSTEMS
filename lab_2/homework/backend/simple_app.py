@@ -50,7 +50,17 @@ async def get_matches(league_name: str, season: int, matchday: int, champions_le
             response.raise_for_status()
 
         except httpx.HTTPStatusError:
-           raise HTTPException(status_code=response.status_code, detail='Error downloading matches data')
+            if response.status_code == 403:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail='Access to this data is forbidden'
+                )
+
+            if response.status_code == 404:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail='No matches found for these criteria'
+                )
 
         except httpx.RequestError:
             raise HTTPException(
@@ -59,8 +69,9 @@ async def get_matches(league_name: str, season: int, matchday: int, champions_le
             )
 
     data = response.json()
+    matches_data = data.get('matches', [])
     matches = []
-    for d in data.get('matches'):
+    for d in matches_data:
         home_team = Team(name=d['homeTeam']['name'], logo=d['homeTeam']['crest'])
         away_team = Team(name=d['awayTeam']['name'], logo=d['awayTeam']['crest'])
         result = f"{d['score']['fullTime']['home']}:{d['score']['fullTime']['away']}"
@@ -86,18 +97,37 @@ async def get_season_standings(league_name: str, season: int, matchday: int, ord
 
         try:
             response = await a_client.get(url=url, params=params, headers=headers)
-
+            response.raise_for_status()
         except httpx.HTTPStatusError:
-            HTTPException(status_code=response.status_code, detail="Error downloading standings data")
+            if response.status_code == 403:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail='Access to this data is forbidden'
+                )
+
+            if response.status_code == 404:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail='No league table found for these criteria'
+                )
 
         except httpx.RequestError:
-            HTTPException(status_code=response.status_code, detail="Connection error during downloading standings data")
+            raise HTTPException(
+                status_code=response.status_code,
+                detail="Connection error during downloading standings data"
+            )
 
     data = response.json()
 
     season_table = []
 
-    for team_stats in data['standings'][0]['table']:
+    standings = data.get('standings', [])
+    if standings and isinstance(standings, list):
+        table = standings[0].get('table', []) if len(standings) > 0 else []
+    else:
+        table = []
+
+    for team_stats in table:
         team_name = team_stats['team']['name']
         logo = team_stats['team']['crest']
 
