@@ -21,8 +21,14 @@ const SearchStandingsForm = () =>{
         event.preventDefault();
         setStandingsData(null);
         setError(null);
-        setIsLoading(true);
+        setIsLoading(false);
+
+        if(!leagueName || !season || !matchday || !orderBy || !desc){
+            setError('Each filter options should be set before submitting');
+        }
+
         if (leagueName && season && matchday && orderBy && desc) {
+            setIsLoading(true);
 
 
             try {
@@ -39,7 +45,8 @@ const SearchStandingsForm = () =>{
                 setStandingsData(response.data);
 
             }catch (error){
-                setError(error.response?.data?.message || "Error fetching league table");
+                console.error(error.response);
+                setError(error.response?.data?.detail || "Error downloading standings data");
             }
             finally {
                 setIsLoading(false);
@@ -79,6 +86,7 @@ const SearchStandingsForm = () =>{
               onChange={(e) => setSeason(e.target.value)}
               placeholder="Enter season"
               className="form-input"
+              min='1872'
             />
           </div>
 
@@ -110,6 +118,7 @@ const SearchStandingsForm = () =>{
               onChange={(e) => setMatchday(e.target.value)}
               placeholder="Enter matchday"
               className="form-input"
+              min='1'
             />
           </div>
         </div>

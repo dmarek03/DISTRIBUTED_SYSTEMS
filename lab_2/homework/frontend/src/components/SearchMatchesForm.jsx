@@ -17,7 +17,12 @@ const SearchMatchesForm = () => {
         event.preventDefault()
         setMatchesData(null);
         setError(null);
-        setIsLoading(true);
+        setIsLoading(false);
+
+        if(!leagueName || !season || !matchday){
+            setError("Each filter options should be set before submitting")
+        }
+
         if (leagueName && season && matchday) {
 
             setIsLoading(true);
@@ -35,7 +40,7 @@ const SearchMatchesForm = () => {
                 setMatchesData(response.data);
 
             } catch (error) {
-                setError(error.response?.data?.message || "Error fetching matches");
+                setError(error.response?.data?.detail || "Error fetching matches");
 
             } finally {
                 setIsLoading(false);
@@ -75,6 +80,7 @@ const SearchMatchesForm = () => {
               onChange={(e) => setSeason(e.target.value)}
               placeholder="Enter season"
               className="form-input"
+              min='1872'
             />
           </div>
           {leagueName === 'CL' && (
@@ -104,6 +110,7 @@ const SearchMatchesForm = () => {
               onChange={(e) => setMatchday(e.target.value)}
               placeholder="Enter matchday"
               className="form-input"
+              min='1'
             />
           </div>
         </div>
