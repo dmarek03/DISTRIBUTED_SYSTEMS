@@ -1,0 +1,3 @@
+TestSystem.endpoints=tcp -h 127.0.0.2 -p 10000 -z : udp -h 127.0.0.2 -p 10000 -z
+Ice.Warn.Connections=1
+Ice.ACM.Timeout=10
