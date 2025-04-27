@@ -22,7 +22,6 @@ client_id = 21
 
 
 
-
 def get_user_input(message: str) -> int | str:
     while not re.match(r'^[0-9]+|exit$', text := input(f'{message}:\n')):
         print(f'{text} is incorrect')
