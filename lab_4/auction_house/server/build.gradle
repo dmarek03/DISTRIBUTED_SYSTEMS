@@ -2,14 +2,14 @@ plugins {
     id 'java'
     id 'com.google.protobuf' version '0.9.4'
     id 'idea'
-    id 'application' // Dodane dla łatwego uruchamiania
+    id 'application'
 }
 
 repositories {
     mavenCentral()
 }
 
-// Najnowsze stabilne wersje (grudzień 2023)
+
 def grpcVersion = '1.59.0'
 def protobufVersion = '3.24.4'
 def protobufGradlePluginVersion = '0.9.4'
@@ -18,9 +18,8 @@ dependencies {
     implementation "io.grpc:grpc-netty:${grpcVersion}"
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
-    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // Dla Java 9+
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' 
 
-    // Testowe
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
     testImplementation 'junit:junit:4.13.2'
 }
