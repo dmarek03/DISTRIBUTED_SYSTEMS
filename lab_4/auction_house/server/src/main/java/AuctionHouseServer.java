@@ -46,7 +46,7 @@ public class AuctionHouseServer {
                     AuctionType.STANDARD, "Krakowskie Przedmieście 15", "Warszawa", false, 7);
 
             Auction auction1 = createAuction(1, "Aukcja antyków", "Zabytkowe meble i przedmioty",
-                    AuctionType.PREMIUM, "Wiejska 46c", "Łódz", true, 3);
+                    AuctionType.PREMIUM, "Wiejska 46c", "Kraków", true, 3);
 
             auctions.put(0, auction0);
             auctions.put(1, auction1);
@@ -415,7 +415,7 @@ public class AuctionHouseServer {
                 } catch (Exception e) {
                     System.err.println("Scheduler error in createNewAuction: " + e.getMessage());
                 }
-            }, 1, 7, TimeUnit.SECONDS);
+            }, 1, 30, TimeUnit.SECONDS);
 
             scheduler.scheduleAtFixedRate(() -> {
                 try {
@@ -423,7 +423,7 @@ public class AuctionHouseServer {
                 } catch (Exception e) {
                     System.err.println("Scheduler error in createNewItem: " + e.getMessage());
                 }
-            }, 1, 3, TimeUnit.SECONDS);
+            }, 1, 15, TimeUnit.SECONDS);
 
             scheduler.scheduleAtFixedRate(() -> {
                 try {
