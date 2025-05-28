@@ -33,7 +33,7 @@ services:
       resources:
         limits:
           cpus: ${NUM_CPU_WORKER}
-          memory: '2g'
+          memory: '1g'
     networks:
       - ray_net
 
