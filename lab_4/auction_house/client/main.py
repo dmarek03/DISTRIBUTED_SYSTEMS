@@ -18,7 +18,7 @@ from proto.auction_house_pb2 import (
 PORT = 50051
 EXIT = 1
 
-client_id = 21
+client_id = 3
 
 
 
