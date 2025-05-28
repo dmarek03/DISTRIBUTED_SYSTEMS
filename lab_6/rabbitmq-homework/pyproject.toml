@@ -1,0 +1,17 @@
+[project]
+name = "rabbitmq-homework"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "dmarek03",email = "domarek@student.agh.edu.pl"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pika (>=1.3.2,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
