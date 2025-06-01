@@ -4,7 +4,7 @@ import pika
 from dataclasses import dataclass
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from threading import Thread
-from message import Message, SenderType
+from message import Message, SenderType, format_log
 from configuration import exchange_admin_in, exchange_admin_out
 
 
@@ -19,49 +19,93 @@ class AdminPanel:
 
     def setup_connection(self) -> None:
         self.connection_in = pika.BlockingConnection(
-            pika.ConnectionParameters(host="localhost"),
+            pika.ConnectionParameters(host="localhost", heartbeat=600),
         )
 
         self.connection_out = pika.BlockingConnection(
-            pika.ConnectionParameters(host="localhost"),
+            pika.ConnectionParameters(host="localhost", heartbeat=600),
         )
 
         self.channel_in = self.connection_in.channel()
         self.channel_out = self.connection_out.channel()
 
-        self.channel_in.exchange_declare(exchange=exchange_admin_in, exchange_type="topic")
-        self.channel_out.exchange_declare(exchange=exchange_admin_out, exchange_type="topic")
+        self.channel_in.exchange_declare(
+            exchange=exchange_admin_in, exchange_type="topic"
+        )
+        self.channel_out.exchange_declare(
+            exchange=exchange_admin_out, exchange_type="topic"
+        )
 
-        result = self.channel_in.queue_declare('', exclusive=True)
+        result = self.channel_in.queue_declare("", exclusive=True)
         self.queue_name = result.method.queue
 
-        self.channel_in.queue_bind(exchange=exchange_admin_in, routing_key="admin.*", queue=self.queue_name)
+        self.channel_in.queue_bind(
+            exchange=exchange_admin_in, routing_key="admin.*.*", queue=self.queue_name
+        )
 
     def send_broadcast(self, message: Message):
-        self.channel_out.basic_publish(exchange=exchange_admin_out, routing_key="all.info",
-                                       body=json.dumps(message.to_dict()))
-        print(f"Send broadcast:{message.to_dict()}")
+        self.channel_out.basic_publish(
+            exchange=exchange_admin_out,
+            routing_key="broadcast.all.info",
+            body=json.dumps(message.to_dict()),
+        )
+
+        print(
+            format_log(
+                SenderType.ADMIN,
+                "admin_panel",
+                "broadcast.all.info",
+                message.body,
+                direction="SENT",
+            )
+        )
 
     def send_message_to_crews(self, message: Message):
-        self.channel_out.basic_publish(exchange=exchange_admin_out, routing_key="crew.info",
-                                       body=json.dumps(message.to_dict()))
-        print(f"Send messages to crews:{message.to_dict()}")
+        self.channel_out.basic_publish(
+            exchange=exchange_admin_out,
+            routing_key="crew.all.notification",
+            body=json.dumps(message.to_dict()),
+        )
+
+        print(
+            format_log(
+                SenderType.ADMIN,
+                "admin_panel",
+                "crew.all.notification",
+                message.body,
+                direction="SENT",
+            )
+        )
 
     def send_message_to_suppliers(self, message: Message):
-        self.channel_out.basic_publish(exchange=exchange_admin_out, routing_key="supplier.info",
-                                       body=json.dumps(message.to_dict()))
-        print(f"Send messages to suppliers:{message.to_dict()}")
+        self.channel_out.basic_publish(
+            exchange=exchange_admin_out,
+            routing_key="supplier.all.notification",
+            body=json.dumps(message.to_dict()),
+        )
+
+        print(
+            format_log(
+                SenderType.ADMIN,
+                "admin_panel",
+                "supplier.all.notification",
+                message.body,
+                direction="SENT",
+            )
+        )
 
     @staticmethod
     def callback(ch, method, properties, body):
         data = json.loads(body.decode())
-        sender = data['sender']
-        sender_type = data['sender_type']
-        message = data['body']
+        sender = data["sender"]
+        sender_type = data["sender_type"]
+        message = data["body"]
 
         routing_key = method.routing_key
 
-        print(f"[{routing_key}] From {sender_type}:{sender} – {message}")
+        print(
+            format_log(sender_type, sender, routing_key, message, direction="RECEIVED")
+        )
 
     def wait_for_message(self) -> None:
         self.channel_in.basic_consume(
@@ -80,7 +124,11 @@ class AdminPanel:
         while True:
             receiver = self.get_receiver(text="Enter receiver:\n")
 
-            message = Message(sender="admin_panel", sender_type=SenderType.ADMIN, body=input("Enter message:"))
+            message = Message(
+                sender="admin_panel",
+                sender_type=SenderType.ADMIN,
+                body=input("Enter message:"),
+            )
             match receiver:
                 case "A":
                     self.send_broadcast(message)
@@ -103,5 +151,5 @@ def main() -> None:
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
