@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'lib'
+    }
+}
+
+dependencies {
+    implementation name: 'amqp-client-5.11.0'
+    implementation name: 'slf4j-api-1.7.29'
+    implementation name: 'slf4j-simple-1.6.2'
+}
+
+
+
+test {
+    useJUnitPlatform()
+}
